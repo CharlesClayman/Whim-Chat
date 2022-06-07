@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "134950127029",
+    "project_id": "whim-chat",
+    "storage_bucket": "whim-chat.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:134950127029:android:07dac6ce3ee6fe8c1385fc",
+        "android_client_info": {
+          "package_name": "com.example.whim_chat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "134950127029-01g6r5s53qcaeaf1mn9o06mp6215keia.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbGJGng8cqhfsKMPCpD_9qD-0Qg83mc6U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "134950127029-01g6r5s53qcaeaf1mn9o06mp6215keia.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
