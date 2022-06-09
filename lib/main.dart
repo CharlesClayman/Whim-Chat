@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: lightMode,
-      home: SignUp(),
+      home: SignUpScreen(),
     );
   }
 }
