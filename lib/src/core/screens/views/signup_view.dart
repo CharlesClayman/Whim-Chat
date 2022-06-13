@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
+import 'package:whim_chat/src/core/screens/views/signup_profile_view.dart';
+import 'package:whim_chat/src/core/screens/widgets/custom_button.dart';
 import 'package:whim_chat/src/core/utils/colors.dart';
-import 'home_view.dart';
 
 class SignUpScreen extends StatefulWidget {
   @override
@@ -16,7 +18,10 @@ class _SignUpState extends State<SignUpScreen> {
   bool _isLoading = false;
   bool _codeSent = false;
   String _verificationId = "";
-  String formattedPhoneNum = "";
+  String _formattedPhoneNum = "";
+  int _resendOtpCountdown = 60;
+  late Timer _timer;
+  bool _isTimeOut = false;
 
   @override
   void dispose() {
@@ -24,9 +29,24 @@ class _SignUpState extends State<SignUpScreen> {
     _phoneController.dispose();
   }
 
-  void NavigateToHome() {
+  void startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _resendOtpCountdown == 0
+          ? setState(() {
+              _isTimeOut = true;
+              _timer.cancel();
+            })
+          : setState(() => --_resendOtpCountdown);
+    });
+  }
+
+  void navigateToSetupProfile() {
     Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (context) => HomeScreen()));
+        context,
+        MaterialPageRoute(
+            builder: (context) => SetUpProfile(
+                  phoneNumber: _formattedPhoneNum,
+                )));
   }
 
   void signUp() async {
@@ -35,18 +55,23 @@ class _SignUpState extends State<SignUpScreen> {
     });
 
     await _auth.verifyPhoneNumber(
-        phoneNumber: formattedPhoneNum,
+        phoneNumber: _formattedPhoneNum,
+        timeout: const Duration(seconds: 60),
         verificationCompleted: (PhoneAuthCredential credential) async {
           await _auth.signInWithCredential(credential);
-          NavigateToHome();
+          navigateToSetupProfile();
         },
-        verificationFailed: (FirebaseAuthException ex) {},
+        verificationFailed: (FirebaseAuthException ex) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(ex.toString())));
+        },
         codeSent: (String verificationId, int? resendToken) {
           setState(() {
             _isLoading = false;
             _codeSent = true;
-            _verificationId = verificationId;
           });
+          _verificationId = verificationId;
+          startTimer();
         },
         codeAutoRetrievalTimeout: (String verificationId) {});
   }
@@ -55,13 +80,11 @@ class _SignUpState extends State<SignUpScreen> {
     setState(() {
       _isLoading = true;
     });
-
     PhoneAuthCredential credential = PhoneAuthProvider.credential(
         verificationId: _verificationId, smsCode: otpCode);
-
     await _auth
         .signInWithCredential(credential)
-        .then((value) => NavigateToHome());
+        .then((value) => navigateToSetupProfile());
   }
 
   @override
@@ -78,11 +101,12 @@ class _SignUpState extends State<SignUpScreen> {
         ),
         Positioned.fill(
             child: Container(
-                color: Colors.black.withOpacity(0.8),
-                padding: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * 0.1,
-                ),
-                child: _codeSent ? otpVerification() : createAccount()))
+          color: Colors.black.withOpacity(0.8),
+          padding: EdgeInsets.symmetric(
+            horizontal: MediaQuery.of(context).size.width * 0.1,
+          ),
+          child: _codeSent ? otpVerification() : createAccount(),
+        ))
       ]),
     );
   }
@@ -92,14 +116,13 @@ class _SignUpState extends State<SignUpScreen> {
     return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints viewportConstraints) {
       return SingleChildScrollView(
-        //physics: const ClampingScrollPhysics(),
-
         child: ConstrainedBox(
           constraints: BoxConstraints(
             minHeight: viewportConstraints.maxHeight,
           ),
           child: IntrinsicHeight(
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(
                   height: 25,
@@ -130,7 +153,7 @@ class _SignUpState extends State<SignUpScreen> {
                 //Phone textField
                 InternationalPhoneNumberInput(
                   onInputChanged: (PhoneNumber number) {
-                    formattedPhoneNum = number.toString();
+                    _formattedPhoneNum = number.toString();
                   },
                   selectorConfig: const SelectorConfig(
                     selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
@@ -162,33 +185,10 @@ class _SignUpState extends State<SignUpScreen> {
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.08,
                 ),
-                InkWell(
-                  child: Container(
-                    width: double.infinity,
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    margin: EdgeInsets.symmetric(
-                        horizontal: MediaQuery.of(context).size.width * 0.2),
-                    decoration: const ShapeDecoration(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
-                      ),
-                      color: mainAppColor,
-                    ),
-                    child: !_isLoading
-                        ? const Text(
-                            'Create Account',
-                            style:
-                                TextStyle(color: lightModeColor, fontSize: 18),
-                          )
-                        : const CircularProgressIndicator(
-                            color: Colors.white,
-                          ),
-                  ),
-                  onTap: () {
-                    signUp();
-                  },
-                ),
+                CustomerButton(
+                    onTapFunction: () => signUp(),
+                    isLoading: _isLoading,
+                    label: "Create Account"),
                 Expanded(child: Container()),
               ],
             ),
@@ -202,6 +202,7 @@ class _SignUpState extends State<SignUpScreen> {
   Widget otpVerification() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
           height: AppBar().preferredSize.height,
@@ -213,16 +214,15 @@ class _SignUpState extends State<SignUpScreen> {
               style: Theme.of(context)
                   .textTheme
                   .headline5
-                  ?.merge(TextStyle(color: mainAppColor))),
+                  ?.merge(const TextStyle(color: mainAppColor))),
         ),
         Text('Waiting to automatically detect OTP SMS to your number.',
             style: Theme.of(context)
                 .textTheme
                 .subtitle1
-                ?.merge(TextStyle(color: Colors.white))),
+                ?.merge(const TextStyle(color: Colors.white))),
         InkWell(
-          onTap: () => Navigator.push(
-              context, MaterialPageRoute(builder: (context) => SignUpScreen())),
+          onTap: () => setState(() => _codeSent = false),
           child: Container(
             padding:
                 EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.04),
@@ -230,52 +230,66 @@ class _SignUpState extends State<SignUpScreen> {
                 style: Theme.of(context)
                     .textTheme
                     .subtitle1
-                    ?.merge(TextStyle(color: mainAppColor))),
+                    ?.merge(const TextStyle(color: mainAppColor))),
           ),
         ),
         Container(
           padding: EdgeInsets.symmetric(
               vertical: MediaQuery.of(context).size.height * 0.03),
           child: OtpTextField(
-            textStyle: TextStyle(color: Colors.white),
+            textStyle: const TextStyle(color: Colors.white),
             numberOfFields: 6,
             cursorColor: mainAppColor,
             borderColor: mainAppColor,
             focusedBorderColor: mainAppColor,
-            //set to true to show as box or false to show as dash
             showFieldAsBox: true,
-            //runs when every textfield is filled
             onSubmit: (String verificationCode) {
-              print(verificationCode);
               verifyOtp(verificationCode);
-            }, // end onSubmit
+            },
           ),
         ),
         Text('Enter 6-digits code',
             style: Theme.of(context)
                 .textTheme
                 .subtitle1
-                ?.merge(TextStyle(color: Colors.white))),
+                ?.merge(const TextStyle(color: Colors.white))),
         Container(
           padding: EdgeInsets.symmetric(
               vertical: MediaQuery.of(context).size.height * 0.06),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Icon(
+              const Icon(
                 Icons.message,
                 color: Colors.grey,
               ),
-              Text('Resend OTP',
-                  style: Theme.of(context)
-                      .textTheme
-                      .subtitle1
-                      ?.merge(TextStyle(color: Colors.grey))),
-              Text('54',
-                  style: Theme.of(context)
-                      .textTheme
-                      .subtitle1
-                      ?.merge(TextStyle(color: Colors.grey))),
+              Visibility(
+                visible: _isTimeOut,
+                child: TextButton(
+                    style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.all(mainAppColor)),
+                    onPressed: () {
+                      setState(() {
+                        _resendOtpCountdown = 60;
+                        _isTimeOut = false;
+                      });
+                      signUp();
+                    },
+                    child: Text('Resend OTP',
+                        style: Theme.of(context)
+                            .textTheme
+                            .subtitle1
+                            ?.merge(const TextStyle(color: Colors.white)))),
+              ),
+              Visibility(
+                visible: !_isTimeOut,
+                child: Text(_resendOtpCountdown.toString(),
+                    style: Theme.of(context)
+                        .textTheme
+                        .subtitle1
+                        ?.merge(const TextStyle(color: Colors.grey))),
+              ),
             ],
           ),
         ),

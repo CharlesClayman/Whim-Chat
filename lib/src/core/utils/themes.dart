@@ -18,7 +18,9 @@ final ThemeData lightMode = ThemeData.light().copyWith(
       selectedItemColor: mainAppColor,
       unselectedItemColor: Colors.black,
     ),
-    colorScheme: ThemeData().colorScheme.copyWith(secondary: lightModeColor),
+    colorScheme: ThemeData()
+        .colorScheme
+        .copyWith(primary: mainAppColor, secondary: lightModeColor),
     scaffoldBackgroundColor: lightModeColor,
     tabBarTheme: ThemeData().tabBarTheme.copyWith(
         labelColor: mainAppColor,
