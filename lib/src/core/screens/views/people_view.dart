@@ -90,7 +90,10 @@ class _PeopleViewState extends State<PeopleView> {
   @override
   Widget build(BuildContext context) {
     final userStream = firestore.collection('users').snapshots();
-    late List friendsIds;
+    late List friendsIds = [];
+    late var friendsSnapshot;
+    late var discoverFriendsSnapshot;
+
     return StreamBuilder<QuerySnapshot>(
         stream: userStream,
         builder: ((context, snapshot) {
@@ -104,7 +107,9 @@ class _PeopleViewState extends State<PeopleView> {
             friendsIds = value.docs.map((e) => e.id).toList();
           });
 
-          var newFriendsSnapshot = snapshot.data?.docs
+          friendsSnapshot = snapshot.data?.docs
+              .where((element) => friendsIds.contains(element.id));
+          discoverFriendsSnapshot = snapshot.data?.docs
               .where(((element) => element.id != auth.currentUser!.uid))
               .where((element) => !friendsIds.contains(element.id));
 
@@ -135,7 +140,7 @@ class _PeopleViewState extends State<PeopleView> {
                         removeRight: true,
                         child: ListView.separated(
                           scrollDirection: Axis.horizontal,
-                          itemCount: users().length,
+                          itemCount: friendsSnapshot?.toList().length ?? 0,
                           itemBuilder: (context, index) {
                             return Column(
                               mainAxisSize: MainAxisSize.min,
@@ -145,8 +150,12 @@ class _PeopleViewState extends State<PeopleView> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => ConversationView(
-                                          name: users()[index].username,
-                                          photoUrl: users()[index].photoUrl,
+                                          name: friendsSnapshot!
+                                              .toList()[index]
+                                              .get('username'),
+                                          photoUrl: friendsSnapshot
+                                              .toList()[index]
+                                              .get('photoUrl'),
                                         ),
                                       )),
                                   child: Stack(
@@ -158,7 +167,9 @@ class _PeopleViewState extends State<PeopleView> {
                                                   .height *
                                               0.04,
                                           backgroundImage: NetworkImage(
-                                            users()[index].photoUrl,
+                                            friendsSnapshot!
+                                                .toList()[index]
+                                                .get('photoUrl'),
                                           )),
                                       Positioned(
                                         bottom:
@@ -180,7 +191,9 @@ class _PeopleViewState extends State<PeopleView> {
                                   ),
                                 ),
                                 Text(
-                                  users()[index].username,
+                                  friendsSnapshot
+                                      .toList()[index]
+                                      .get('username'),
                                   style: Theme.of(context).textTheme.bodySmall,
                                 )
                               ],
@@ -208,7 +221,7 @@ class _PeopleViewState extends State<PeopleView> {
                           removeTop: true,
                           removeBottom: true,
                           child: ListView.separated(
-                            itemCount: newFriendsSnapshot?.length ?? 0,
+                            itemCount: discoverFriendsSnapshot?.length ?? 0,
                             itemBuilder: (context, index) {
                               return ListTile(
                                 contentPadding: const EdgeInsets.all(0),
@@ -217,12 +230,12 @@ class _PeopleViewState extends State<PeopleView> {
                                     radius: MediaQuery.of(context).size.height *
                                         0.06,
                                     backgroundImage: NetworkImage(
-                                      newFriendsSnapshot!
+                                      discoverFriendsSnapshot!
                                           .toList()[index]
                                           .get('photoUrl'),
                                     )),
                                 title: Text(
-                                  newFriendsSnapshot
+                                  discoverFriendsSnapshot
                                       .toList()[index]
                                       .get('username'),
                                   style: Theme.of(context)
