@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:whim_chat/src/core/screens/views/home_view.dart';
 import 'package:whim_chat/src/core/screens/widgets/custom_button.dart';
+import 'package:whim_chat/src/core/screens/widgets/profile_pic.dart';
 import 'package:whim_chat/src/core/services/database_service.dart';
 import 'package:whim_chat/src/core/services/picker_service.dart';
 import 'package:whim_chat/src/core/utils/colors.dart';
@@ -77,32 +78,26 @@ class _SetUpProfileState extends State<SetUpProfile> {
           ),
           Stack(children: [
             _image != null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(
-                        MediaQuery.of(context).size.height * 0.3),
-                    child: Container(
-                        // color: AppColors.grayLight,
-                        width: MediaQuery.of(context).size.height * 0.3,
-                        height: MediaQuery.of(context).size.height * 0.3,
-                        child: Image.memory(
-                          _image!,
-                          fit: BoxFit.cover,
-                        )))
-                : CircleAvatar(
-                    radius: MediaQuery.of(context).size.height * 0.09,
-                    backgroundImage:
-                        const AssetImage('assets/images/signupBackground.jpg'),
-                  ),
+                ? ProfilePic(
+                    ChildWidget: Image.memory(
+                    _image!,
+                    fit: BoxFit.cover,
+                  ))
+                : ProfilePic(
+                    ChildWidget: Image.asset(
+                    'assets/images/signupBackground.jpg',
+                    fit: BoxFit.cover,
+                  )),
             Positioned(
-                bottom: -10,
-                left: 80,
+                bottom: -(MediaQuery.of(context).size.height * 0.01),
+                left: MediaQuery.of(context).size.height * 0.11,
                 child: IconButton(
                   iconSize: MediaQuery.of(context).size.height * 0.05,
                   onPressed: getImage,
                   icon: const Icon(
                     Icons.add_a_photo,
                   ),
-                ))
+                )),
           ]),
           Container(
             padding: EdgeInsets.symmetric(

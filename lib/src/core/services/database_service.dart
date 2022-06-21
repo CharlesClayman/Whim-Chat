@@ -41,4 +41,50 @@ class DatabaseService {
 
     return response;
   }
+
+  Future<String> updateUsername(String username) async {
+    String response = "Something Went wrong";
+    try {
+      await _firestore
+          .collection('users')
+          .doc(_auth.currentUser!.uid)
+          .update({'username': username}).then((_) => response = "success");
+    } catch (ex) {
+      response = ex.toString();
+    }
+
+    return response;
+  }
+
+  Future<String> updateProfilePic(Uint8List image) async {
+    String response = "Something went wrong";
+    try {
+      String photoUrl =
+          await StorageService().uploadImageToStorage("profilePics", image);
+      await _firestore
+          .collection("users")
+          .doc(_auth.currentUser!.uid)
+          .update({"photoUrl": photoUrl}).then((_) => response = "success");
+    } catch (ex) {
+      response = ex.toString();
+    }
+    return response;
+  }
+
+  Future<String> addFriend(String friendId) async {
+    String response = "Something went wrong";
+    try {
+      _firestore
+          .collection('users')
+          .doc(_auth.currentUser!.uid)
+          .collection('friends')
+          .doc(friendId)
+          .set({});
+
+      response = "Success";
+    } catch (ex) {
+      response = ex.toString();
+    }
+    return response;
+  }
 }

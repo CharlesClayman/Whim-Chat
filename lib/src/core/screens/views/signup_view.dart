@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:whim_chat/src/core/screens/views/signup_profile_view.dart';
+
 import 'package:whim_chat/src/core/screens/widgets/custom_button.dart';
 import 'package:whim_chat/src/core/utils/colors.dart';
+
+import '../widgets/profile_pic.dart';
 
 class SignUpScreen extends StatefulWidget {
   @override
@@ -58,8 +61,9 @@ class _SignUpState extends State<SignUpScreen> {
         phoneNumber: _formattedPhoneNum,
         timeout: const Duration(seconds: 60),
         verificationCompleted: (PhoneAuthCredential credential) async {
-          await _auth.signInWithCredential(credential);
-          navigateToSetupProfile();
+          await _auth
+              .signInWithCredential(credential)
+              .then((_) => navigateToSetupProfile());
         },
         verificationFailed: (FirebaseAuthException ex) {
           ScaffoldMessenger.of(context)
@@ -84,7 +88,7 @@ class _SignUpState extends State<SignUpScreen> {
         verificationId: _verificationId, smsCode: otpCode);
     await _auth
         .signInWithCredential(credential)
-        .then((value) => navigateToSetupProfile());
+        .then((_) => navigateToSetupProfile());
   }
 
   @override
@@ -140,13 +144,12 @@ class _SignUpState extends State<SignUpScreen> {
                   height: MediaQuery.of(context).size.height * 0.1,
                 ),
                 //App logo
-                const FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: CircleAvatar(
-                    radius: 85,
-                    backgroundImage: AssetImage('assets/images/Whim_Logo.jpg'),
-                  ),
-                ),
+                ProfilePic(
+                    ChildWidget: Image.asset(
+                  'assets/images/Whim_Logo.jpg',
+                  fit: BoxFit.fill,
+                )),
+
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.04,
                 ),
@@ -259,9 +262,12 @@ class _SignUpState extends State<SignUpScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              const Icon(
-                Icons.message,
-                color: Colors.grey,
+              Visibility(
+                visible: !_isTimeOut,
+                child: const Icon(
+                  Icons.timer,
+                  color: Colors.grey,
+                ),
               ),
               Visibility(
                 visible: _isTimeOut,
