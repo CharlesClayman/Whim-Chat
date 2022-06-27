@@ -147,10 +147,8 @@ class _ChatViewState extends State<ChatView> {
                               onTap: () => Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => ConversationView(
-                                            name: users()[index].username,
-                                            photoUrl: users()[index].photoUrl,
-                                          ))),
+                                      builder: (context) =>
+                                          ConversationView())),
                               child: ListTile(
                                 contentPadding: EdgeInsets.all(0),
                                 leading: CircleAvatar(

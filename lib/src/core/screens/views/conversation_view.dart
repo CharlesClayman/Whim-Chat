@@ -1,14 +1,11 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:whim_chat/src/core/providers/people_provider.dart';
 
 class ConversationView extends StatelessWidget {
-  final String name;
-  final String photoUrl;
-  const ConversationView({required this.name, required this.photoUrl});
-
   @override
   Widget build(BuildContext context) {
+    final peopleProvider = Provider.of<PeopleProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -17,14 +14,14 @@ class ConversationView extends StatelessWidget {
                 backgroundColor: Colors.grey,
                 //  radius: MediaQuery.of(context).size.height * 0.04,
                 backgroundImage: NetworkImage(
-                  photoUrl,
+                  peopleProvider.photoUrl,
                 )),
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.03,
             ),
             Column(
               children: [
-                Text(name,
+                Text(peopleProvider.username,
                     style: Theme.of(context)
                         .textTheme
                         .titleLarge
