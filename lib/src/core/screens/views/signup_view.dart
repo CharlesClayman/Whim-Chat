@@ -216,14 +216,14 @@ class _SignUpState extends State<SignUpScreen> {
           child: Text('Verify Phone',
               style: Theme.of(context)
                   .textTheme
-                  .headline5
-                  ?.merge(const TextStyle(color: mainAppColor))),
+                  .headline5!
+                  .copyWith(color: mainAppColor)),
         ),
         Text('Waiting to automatically detect OTP SMS to your number.',
             style: Theme.of(context)
                 .textTheme
-                .subtitle1
-                ?.merge(const TextStyle(color: Colors.white))),
+                .subtitle1!
+                .copyWith(color: Colors.white)),
         InkWell(
           onTap: () => setState(() => _codeSent = false),
           child: Container(
@@ -232,8 +232,8 @@ class _SignUpState extends State<SignUpScreen> {
             child: Text('Wrong number? Click here',
                 style: Theme.of(context)
                     .textTheme
-                    .subtitle1
-                    ?.merge(const TextStyle(color: mainAppColor))),
+                    .subtitle1!
+                    .copyWith(color: mainAppColor)),
           ),
         ),
         Container(
@@ -254,8 +254,8 @@ class _SignUpState extends State<SignUpScreen> {
         Text('Enter 6-digits code',
             style: Theme.of(context)
                 .textTheme
-                .subtitle1
-                ?.merge(const TextStyle(color: Colors.white))),
+                .subtitle1!
+                .copyWith(color: Colors.white)),
         Container(
           padding: EdgeInsets.symmetric(
               vertical: MediaQuery.of(context).size.height * 0.06),
@@ -285,16 +285,16 @@ class _SignUpState extends State<SignUpScreen> {
                     child: Text('Resend OTP',
                         style: Theme.of(context)
                             .textTheme
-                            .subtitle1
-                            ?.merge(const TextStyle(color: Colors.white)))),
+                            .subtitle1!
+                            .copyWith(color: Colors.white))),
               ),
               Visibility(
                 visible: !_isTimeOut,
                 child: Text(_resendOtpCountdown.toString(),
                     style: Theme.of(context)
                         .textTheme
-                        .subtitle1
-                        ?.merge(const TextStyle(color: Colors.grey))),
+                        .subtitle1!
+                        .copyWith(color: Colors.grey)),
               ),
             ],
           ),

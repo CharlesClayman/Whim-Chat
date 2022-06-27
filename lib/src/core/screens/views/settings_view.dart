@@ -202,7 +202,7 @@ class _SettingsViewState extends State<SettingsView> {
                 style: Theme.of(context)
                     .textTheme
                     .headline5
-                    ?.merge(const TextStyle(color: mainAppColor)),
+                    ?.copyWith(color: mainAppColor),
               ),
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.05,

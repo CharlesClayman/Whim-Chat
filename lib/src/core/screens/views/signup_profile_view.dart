@@ -73,7 +73,7 @@ class _SetUpProfileState extends State<SetUpProfile> {
               style: Theme.of(context)
                   .textTheme
                   .headline5
-                  ?.merge(const TextStyle(color: mainAppColor)),
+                  ?.copyWith(color: mainAppColor),
             ),
           ),
           Stack(children: [
