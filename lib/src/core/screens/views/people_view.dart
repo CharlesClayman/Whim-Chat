@@ -1,13 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:whim_chat/src/core/models/user.dart' as model;
-import 'package:whim_chat/src/core/providers/people_provider.dart';
-import 'package:whim_chat/src/core/screens/views/conversation_view.dart';
-import 'package:whim_chat/src/core/services/database_service.dart';
+import 'package:whim_chat/src/core/screens/widgets/discover.dart';
+import 'package:whim_chat/src/core/screens/widgets/friend.dart';
 import 'package:whim_chat/src/core/utils/colors.dart';
-import 'package:tuple_dart/tuple_dart.dart';
 
 class PeopleView extends StatefulWidget {
   @override
@@ -21,13 +17,7 @@ class _PeopleViewState extends State<PeopleView> {
   late var friendsSnapshot;
   late var discoverFriendsSnapshot;
 
-  addFriend(String id) async {
-    context.read<PeopleProvider>().setAddingFriend(true);
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    String response = await DatabaseService().addFriend(id);
-    scaffoldMessenger.showSnackBar(SnackBar(content: Text(response)));
-  }
-
+  //Generates a stream of friends Ids from current user's friends collection
   Stream<Iterable<String>> friendsIDsStream(
       AsyncSnapshot<QuerySnapshot<Object?>> snapshot) async* {
     var friends = snapshot.data?.docs
@@ -42,12 +32,15 @@ class _PeopleViewState extends State<PeopleView> {
     yield* friendIdsStream;
   }
 
+  //Returns snapsnot of friends by using the ids from friendsIDsStream to fetch info from users collection
   Iterable<QueryDocumentSnapshot<Object?>> getSnapshotOfFriends(
       dynamic snapshot) {
     return snapshot.data!.docs
         .where((element) => friendsIds.contains(element.id));
   }
 
+  //Returns snapsnot of non-friends by using the ids from friendsIDsStream to filter from users collection
+  //to get non-friends and then fetch info from the collection(users)
   Iterable<QueryDocumentSnapshot<Object?>> getSnapshotOfDiscovFrnds(
       dynamic snapshot) {
     return snapshot.data?.docs
@@ -55,21 +48,10 @@ class _PeopleViewState extends State<PeopleView> {
         .where((element) => !friendsIds.contains(element.id));
   }
 
-  navigateToConvoScreen(dynamic friendsSnapshot, int index) {
-    context.read<PeopleProvider>().setChatProfile(
-        friendsSnapshot!.toList()[index].get('username'),
-        friendsSnapshot.toList()[index].get('photoUrl'));
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ConversationView(),
-        ));
-  }
-
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<QuerySnapshot>(
-        future: firestore.collection('users').get(),
+    return StreamBuilder<QuerySnapshot>(
+        stream: firestore.collection('users').snapshots(),
         builder: ((context, snapshot) {
           if (snapshot.hasError) {
             return const Center(child: Text('Something went wrong'));
@@ -126,59 +108,9 @@ class _PeopleViewState extends State<PeopleView> {
                                     itemCount:
                                         friendsSnapshot?.toList().length ?? 0,
                                     itemBuilder: (context, index) {
-                                      return Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          InkWell(
-                                            onTap: () => navigateToConvoScreen(
-                                                friendsSnapshot, index),
-                                            child: Stack(
-                                              children: [
-                                                CircleAvatar(
-                                                    backgroundColor:
-                                                        Colors.grey,
-                                                    radius:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .height *
-                                                            0.04,
-                                                    backgroundImage:
-                                                        NetworkImage(
-                                                      friendsSnapshot!
-                                                          .toList()[index]
-                                                          .get('photoUrl'),
-                                                    )),
-                                                Positioned(
-                                                  bottom: MediaQuery.of(context)
-                                                          .size
-                                                          .height *
-                                                      0.006,
-                                                  left: MediaQuery.of(context)
-                                                          .size
-                                                          .height *
-                                                      0.062,
-                                                  child: Container(
-                                                    width: 10,
-                                                    height: 10,
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      color:
-                                                          Colors.green.shade400,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          Text(
-                                            friendsSnapshot
-                                                .toList()[index]
-                                                .get('username'),
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall,
-                                          )
-                                        ],
+                                      return Friend(
+                                        friendsSnapshot: friendsSnapshot,
+                                        index: index,
                                       );
                                     },
                                     separatorBuilder: (context, index) {
@@ -209,37 +141,10 @@ class _PeopleViewState extends State<PeopleView> {
                                       itemCount:
                                           discoverFriendsSnapshot?.length ?? 0,
                                       itemBuilder: (context, index) {
-                                        return ListTile(
-                                          contentPadding:
-                                              const EdgeInsets.all(0),
-                                          leading: CircleAvatar(
-                                              backgroundColor: Colors.grey,
-                                              radius: MediaQuery.of(context)
-                                                      .size
-                                                      .height *
-                                                  0.06,
-                                              backgroundImage: NetworkImage(
-                                                discoverFriendsSnapshot!
-                                                    .toList()[index]
-                                                    .get('photoUrl'),
-                                              )),
-                                          title: Text(
-                                            discoverFriendsSnapshot
-                                                .toList()[index]
-                                                .get('username'),
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .headline6
-                                                ?.merge(const TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.normal)),
-                                          ),
-                                          trailing: IconButton(
-                                              onPressed: () => addFriend(
-                                                  snapshot
-                                                      .data!.docs[index].id),
-                                              icon: const Icon(Icons.add)),
-                                        );
+                                        return DiscoverFriend(
+                                            discoverFriendsSnapshot:
+                                                discoverFriendsSnapshot,
+                                            index: index);
                                       },
                                       separatorBuilder: (context, index) {
                                         return const Divider(

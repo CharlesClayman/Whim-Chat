@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:whim_chat/src/core/screens/views/home_view.dart';
@@ -42,7 +41,7 @@ class _SetUpProfileState extends State<SetUpProfile> {
     String response = await DatabaseService().setUpProfile(
         username: _usernameController.text,
         phone: widget.phoneNumber!,
-        profileImage: _image!);
+        profileImage: _image);
     if (response == "success") {
       setState(() => _isLoading = false);
       navigator.pushReplacement(
@@ -79,15 +78,19 @@ class _SetUpProfileState extends State<SetUpProfile> {
           Stack(children: [
             _image != null
                 ? ProfilePic(
-                    ChildWidget: Image.memory(
-                    _image!,
-                    fit: BoxFit.cover,
-                  ))
+                    width: MediaQuery.of(context).size.height * 0.2,
+                    height: MediaQuery.of(context).size.height * 0.2,
+                    child: Image.memory(
+                      _image!,
+                      fit: BoxFit.cover,
+                    ))
                 : ProfilePic(
-                    ChildWidget: Image.asset(
-                    'assets/images/signupBackground.jpg',
-                    fit: BoxFit.cover,
-                  )),
+                    width: MediaQuery.of(context).size.height * 0.2,
+                    height: MediaQuery.of(context).size.height * 0.2,
+                    child: Image.asset(
+                      'assets/images/signupBackground.jpg',
+                      fit: BoxFit.cover,
+                    )),
             Positioned(
                 bottom: -(MediaQuery.of(context).size.height * 0.01),
                 left: MediaQuery.of(context).size.height * 0.11,

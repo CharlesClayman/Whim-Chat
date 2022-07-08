@@ -1,15 +1,12 @@
-import 'dart:js';
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:whim_chat/src/core/providers/auth_provider.dart';
+import 'package:whim_chat/src/core/providers/chatlist_provider.dart';
 import 'package:whim_chat/src/core/providers/people_provider.dart';
 import 'package:whim_chat/src/core/providers/theme_provider.dart';
-import 'package:whim_chat/src/core/screens/views/home_view.dart';
-import 'package:whim_chat/src/core/screens/views/signup_view.dart';
+import 'package:whim_chat/src/core/providers/user_provider.dart';
 import 'package:whim_chat/src/core/utils/themes.dart';
 
 void main() async {
@@ -32,6 +29,8 @@ void main() async {
               ThemeProvider(activeTheme ?? lightMode, themeColor ?? "Light")),
       ChangeNotifierProvider(create: (context) => PeopleProvider()),
       ChangeNotifierProvider(create: (context) => AuthProvider()),
+      ChangeNotifierProvider(create: (context) => UserProvider()),
+      ChangeNotifierProvider(create: (context) => ChatlistProvider()),
     ],
     child: const MyApp(),
   ));

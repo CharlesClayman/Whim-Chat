@@ -4,10 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:whim_chat/src/core/screens/views/signup_profile_view.dart';
-
 import 'package:whim_chat/src/core/screens/widgets/custom_button.dart';
 import 'package:whim_chat/src/core/utils/colors.dart';
-
 import '../widgets/profile_pic.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -145,10 +143,12 @@ class _SignUpState extends State<SignUpScreen> {
                 ),
                 //App logo
                 ProfilePic(
-                    ChildWidget: Image.asset(
-                  'assets/images/Whim_Logo.jpg',
-                  fit: BoxFit.fill,
-                )),
+                    width: MediaQuery.of(context).size.height * 0.2,
+                    height: MediaQuery.of(context).size.height * 0.2,
+                    child: Image.asset(
+                      'assets/images/Whim_Logo.jpg',
+                      fit: BoxFit.fill,
+                    )),
 
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.04,

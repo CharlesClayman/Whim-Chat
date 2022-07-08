@@ -39,6 +39,7 @@ dependencies:
   flutter_otp_text_field: ^1.0.1
   group_radio_button: ^1.2.0
   image_picker: ^0.8.5+3
+  intl: ^0.17.0
   intl_phone_number_input: ^0.7.0+2
   provider: ^6.0.3
   shared_preferences: ^2.0.15

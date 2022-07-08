@@ -1,21 +1,30 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 
 class PeopleProvider with ChangeNotifier {
+  final _firestore = FirebaseFirestore.instance;
+
   bool _addingFriend = false;
   String? _photoUrl;
   String? _username;
+  String? _friendId;
+  String _status = "Offline";
 
   bool get addingFriend => _addingFriend;
-  String get photoUrl => _photoUrl!;
-  String get username => _username!;
+  String? get friendPhotoUrl => _photoUrl;
+  String get friendUsername => _username!;
+  String get friendId => _friendId!;
+  String get status => _status;
 
   setAddingFriend(bool addingFriend) {
     _addingFriend = addingFriend;
     notifyListeners();
   }
 
-  setChatProfile(String username, String photoUrl) {
-    _username = username;
-    _photoUrl = photoUrl;
+  setChatProfile(dynamic data) {
+    _friendId = data.get('id');
+    _username = data.get('username');
+    _photoUrl = data.get('photoUrl');
+    _status = data.get('status');
   }
 }

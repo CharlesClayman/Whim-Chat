@@ -170,7 +170,7 @@ class _SettingsViewState extends State<SettingsView> {
     final currentUser = _auth.currentUser;
     final userStream = FirebaseFirestore.instance
         .collection('users')
-        .doc(currentUser?.uid.toString())
+        .doc(currentUser?.uid)
         .snapshots();
 
     return StreamBuilder<DocumentSnapshot>(
@@ -210,26 +210,37 @@ class _SettingsViewState extends State<SettingsView> {
               Stack(children: [
                 _image != null
                     ? ProfilePic(
-                        ChildWidget: Image.memory(
-                        _image!,
-                        fit: BoxFit.cover,
-                      ))
+                        width: MediaQuery.of(context).size.height * 0.2,
+                        height: MediaQuery.of(context).size.height * 0.2,
+                        child: Image.memory(
+                          _image!,
+                          fit: BoxFit.cover,
+                        ))
                     : ProfilePic(
-                        ChildWidget: CachedNetworkImage(
-                          imageUrl: snapshot.data!["photoUrl"],
-                          imageBuilder: (context, imageProvider) => Container(
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                image: NetworkImage(snapshot.data!["photoUrl"]),
+                        width: MediaQuery.of(context).size.height * 0.2,
+                        height: MediaQuery.of(context).size.height * 0.2,
+                        child: snapshot.data!.get("photoUrl") != null
+                            ? CachedNetworkImage(
+                                imageUrl: snapshot.data!.get("photoUrl"),
+                                imageBuilder: (context, imageProvider) =>
+                                    Container(
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                      image: NetworkImage(
+                                          snapshot.data!.get("photoUrl")),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                placeholder: (context, url) =>
+                                    const CircularProgressIndicator(),
+                                errorWidget: (context, url, error) =>
+                                    const Icon(Icons.error),
+                              )
+                            : Image.asset(
+                                'assets/images/signupBackground.jpg',
                                 fit: BoxFit.cover,
                               ),
-                            ),
-                          ),
-                          placeholder: (context, url) =>
-                              const CircularProgressIndicator(),
-                          errorWidget: (context, url, error) =>
-                              const Icon(Icons.error),
-                        ),
                       ),
                 Positioned(
                     bottom: -(MediaQuery.of(context).size.height * 0.01),
